@@ -27,6 +27,9 @@
 .box-list__box-viewport {
   border: 1px solid #0F0;
 }
+.box-list__box-virtual {
+  border: 1px solid #00F;
+}
 .box-list__box-sticky {
   position: sticky;
   z-index: 1;

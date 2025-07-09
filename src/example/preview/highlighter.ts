@@ -1,4 +1,4 @@
-import { debounce } from '../utils/debounce';
+import { debounce } from '../../utils/debounce';
 
 export function highlighter (element: HTMLElement) {
     // Highlight the element

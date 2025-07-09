@@ -1,56 +1,59 @@
-let timerRunning = false;
-let time = 0;
+/**
+ * Frame loop functions
+ * API inspired by motion.dev frame loop
+ * 
+ * It's a simple frame loop that runs the callbacks in the order of the steps
+ * It's also responsible for the cleanup of the callbacks
+ */
+let isTimerRunning = false;
 
 type FrameLoopCallback = (time: number) => any;
 
 type FrameLoopItem = {
     fn: FrameLoopCallback,
-    keepAlive: boolean,
+    once: boolean,
 }
 
-const resetCallbacks: Set<FrameLoopItem> = new Set();
-const readCallbacks: Set<FrameLoopItem> = new Set();
-const updateCallbacks: Set<FrameLoopItem> = new Set();
-const renderCallbacks: Set<FrameLoopItem> = new Set();
+const steps = {
+    setup: new Set<FrameLoopItem>(),
+    read: new Set<FrameLoopItem>(),
+    update: new Set<FrameLoopItem>(),
+    render: new Set<FrameLoopItem>(),
+} as const;
+
+const STEP_NAMES: (keyof typeof steps)[] = Object.keys(steps) as (keyof typeof steps)[];
 
 function iterateCallbacks (callbacks: Set<FrameLoopItem>, time: number) {
     for (const item of callbacks.values()) {
         item.fn(time);
-        if (!item.keepAlive) {
+        if (!item.once) {
             callbacks.delete(item);
         }
     }
 }
 
-function resetStep () {
-    iterateCallbacks(resetCallbacks, time);
-    queueMicrotask(readStep);
-}
-function readStep() {
-    iterateCallbacks(readCallbacks, time);
-    queueMicrotask(updateStep);
-}
-function updateStep() {
-    iterateCallbacks(updateCallbacks, time);
-    queueMicrotask(renderStep);
-}
-function renderStep() {
-    iterateCallbacks(renderCallbacks, time);
+function runStep (index: number, time: number) {
+    const callbacks = steps[STEP_NAMES[index]];
+
+    iterateCallbacks(callbacks, time);
+
+    if (index < STEP_NAMES.length - 1) {
+        queueMicrotask(runStep.bind(null, index + 1, time));
+    }
 }
 
 function tick () {
     requestAnimationFrame(tick);
-    time = performance.now();
-    resetStep();
+    runStep(0, performance.now());
 }
 
-function addCallback (callbacks: Set<FrameLoopItem>, fn: FrameLoopCallback, keepAlive: boolean = false) {
-    const item: FrameLoopItem = { fn, keepAlive };
+function addCallback (callbacks: Set<FrameLoopItem>, fn: FrameLoopCallback, once: boolean = false) {
+    const item: FrameLoopItem = { fn, once };
 
     callbacks.add(item);
 
-    if (!timerRunning) {
-        timerRunning = true;
+    if (!isTimerRunning) {
+        isTimerRunning = true;
         queueMicrotask(tick);
     }
 
@@ -59,13 +62,13 @@ function addCallback (callbacks: Set<FrameLoopItem>, fn: FrameLoopCallback, keep
     }
 }
 
-export const read = addCallback.bind(null, readCallbacks);
-export const reset = addCallback.bind(null, resetCallbacks);
-export const update = addCallback.bind(null, updateCallbacks);
-export const render = addCallback.bind(null, renderCallbacks);
+export const read = addCallback.bind(null, steps.read);
+export const setup = addCallback.bind(null, steps.setup);
+export const update = addCallback.bind(null, steps.update);
+export const render = addCallback.bind(null, steps.render);
 
 export default {
-    reset,
+    setup,
     read,
     update,
     render,

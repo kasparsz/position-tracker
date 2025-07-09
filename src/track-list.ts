@@ -1,44 +1,51 @@
 import type { Tracker } from './index';
 
-const TRACKER_SYMBOL = Symbol('tracker');
-    
+const SYMBOL_TRACKER = Symbol();
+let uid = 0;
+
+/**
+ * Returns a unique id for the given elements.
+ * 
+ * @param elements - The elements to get the id for.
+ * @returns The unique id for the given elements.
+ */
+function getId (...elements: any[]): string {
+    return elements
+        .filter((element) => !!element)
+        .map((element) => {
+            if (element[SYMBOL_TRACKER]) {
+                return element[SYMBOL_TRACKER];
+            } else {
+                return element[SYMBOL_TRACKER] = uid++;
+            }
+        }).join('-');
+}
+
+/**
+ * A list of trackers.
+ */
 export class TrackList {
     trackers: Map<string, Tracker> = new Map<string, Tracker>();
-    idCounter: number = 0;
 
     get size () {
         return this.trackers.size;
     }
 
-    getId (...elements: any[]): string {
-        return elements
-            .filter((element) => !!element)
-            .map((element) => {
-                if (element[TRACKER_SYMBOL]) {
-                    return element[TRACKER_SYMBOL];
-                } else {
-                    const id = this.idCounter++;
-                    element[TRACKER_SYMBOL] = id;
-                    return id;
-                }
-            }).join('-');
-    }
-
     get (...elements: any[]): Tracker | undefined {
-        return this.trackers.get(this.getId(...elements));
+        return this.trackers.get(getId(...elements));
     }
 
     has (...elements: any[]): boolean {
-        return this.trackers.has(this.getId(...elements));
+        return this.trackers.has(getId(...elements));
     }
 
     set (tracker: Tracker, ...elements: any[]) {
-        const id = this.getId(...elements);
-        (tracker as any)[TRACKER_SYMBOL] = id;
-        return this.trackers.set(id, tracker);
+        const id = getId(...elements);
+        (tracker as any)[SYMBOL_TRACKER] = id;
+        this.trackers.set(id, tracker);
     }
 
     delete (...elements: any[]) {
-        return this.trackers.delete(this.getId(...elements));
+        this.trackers.delete(getId(...elements));
     }
 }

@@ -23,6 +23,8 @@ export function draggable (element: HTMLElement, callback: (position: { x: numbe
     element.draggable = false;
 
     element.addEventListener('pointerdown', (event: PointerEvent) => {
+        if (event.defaultPrevented) return;
+
         abortController?.abort();
 
         abortController = new AbortController();

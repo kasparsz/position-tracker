@@ -34,6 +34,8 @@ function isVirtualTracker (tracker: any): tracker is VirtualTracker {
     return tracker && !('element' in tracker && 'update' in tracker) && 'position' in tracker;
 }
 
+// Using symbols to prevent user from accessing the properties
+// and also to decrease the bundle size
 const PROP_CALLBACKS = Symbol();
 const PROP_DIRTY = Symbol();
 const PROP_POSITION_CHANGED = Symbol();
@@ -92,8 +94,12 @@ class Tracker {
         this.element = element;
 
         if (isVirtualTracker(relativeHTMLElement)) {
+            // Virtual tracker is a tracker that is not attached to the DOM,
+            // coordinates are relative to the viewport
             this.relative = relativeHTMLElement;
         } else if (relativeHTMLElement && !(relativeHTMLElement instanceof Window)) {
+            // Because we use getClientRects values are relative to the viewport already
+            // so we only need to track the relative element if it's not a window
             this.relative = track(relativeHTMLElement);
         }
     }
@@ -108,10 +114,13 @@ class Tracker {
         if (!this[PROP_IS_LOOP_ATTACHED]) {
             this[PROP_IS_LOOP_ATTACHED] = true;
 
-            this[PROP_REMOVE_LOOP_RESET] = config.frameLoop.setup(this[FN_RESET].bind(this), true);
-            this[PROP_REMOVE_LOOP_READ] = config.frameLoop.read(this.update.bind(this), true);
-            this[PROP_REMOVE_LOOP_UPDATE] = config.frameLoop.update(this[FN_EMIT].bind(this), true);
+            // Add the tracker to the frame loop and save the remove function (to remove the tracker from the frame loop)
+            this[PROP_REMOVE_LOOP_RESET] = config.frameLoop.setup(this[FN_RESET].bind(this));
+            this[PROP_REMOVE_LOOP_READ] = config.frameLoop.read(this.update.bind(this));
+            this[PROP_REMOVE_LOOP_UPDATE] = config.frameLoop.update(this[FN_EMIT].bind(this));
 
+            // Add empty listener to the relative tracker because tracker will not actually track changes until it's added to the frame loop
+            // and it's only added to the frame loop when it has listeners
             if (this.relative && !isVirtualTracker(this.relative)) {
                 this[PROP_REMOVE_RELATIVE_CHANGE_LISTENER] = (this.relative as Tracker).on(voidCallback);
             }
@@ -134,14 +143,16 @@ class Tracker {
         if (this[PROP_IS_LOOP_ATTACHED]) {
             this[PROP_IS_LOOP_ATTACHED] = false;
 
+            // Remove the tracker from the frame loop
             this[PROP_REMOVE_LOOP_RESET]?.();
             this[PROP_REMOVE_LOOP_READ]?.();
             this[PROP_REMOVE_LOOP_UPDATE]?.();
+            this[PROP_REMOVE_RELATIVE_CHANGE_LISTENER]?.();
 
-            if (this[PROP_REMOVE_RELATIVE_CHANGE_LISTENER]) {
-                this[PROP_REMOVE_RELATIVE_CHANGE_LISTENER]();
-                this[PROP_REMOVE_RELATIVE_CHANGE_LISTENER] = null;
-            }
+            this[PROP_REMOVE_LOOP_RESET] = null;
+            this[PROP_REMOVE_LOOP_READ] = null;
+            this[PROP_REMOVE_LOOP_UPDATE] = null;
+            this[PROP_REMOVE_RELATIVE_CHANGE_LISTENER] = null;
 
             if (deleteFromList) {
                 trackerList.delete(this);

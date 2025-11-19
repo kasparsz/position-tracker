@@ -1,6 +1,10 @@
 import { roundSubPixels } from './utils/round';
 import { TrackList } from './track-list';
 import { config } from './config';
+import { signal, effect, startBatch, endBatch } from 'alien-signals';
+
+window.signal = signal;
+window.effect = effect;
 
 const trackerList = new TrackList();
 const voidCallback = () => {};
@@ -8,6 +12,8 @@ const voidCallback = () => {};
 type TrackerSize = {
     width: number;
     height: number;
+    widthSignal?: ReturnType<typeof signal<number>>;
+    heightSignal?: ReturnType<typeof signal<number>>;
 }
 
 type TrackerPosition = {
@@ -15,6 +21,10 @@ type TrackerPosition = {
     top: number;
     right: number;
     bottom: number;
+    leftSignal?: ReturnType<typeof signal<number>>;
+    topSignal?: ReturnType<typeof signal<number>>;
+    rightSignal?: ReturnType<typeof signal<number>>;
+    bottomSignal?: ReturnType<typeof signal<number>>;
 }
 
 type TrackerCallback = (tracker: Tracker) => void;
@@ -58,13 +68,19 @@ class Tracker {
     relative?: Tracker|VirtualTracker;
 
     // Last know position
-    position: TrackerPosition = { left: 0, top: 0, right: 0, bottom: 0 };
+    position: TrackerPosition = config.useSignal
+        ? { left: 0, top: 0, right: 0, bottom: 0, leftSignal: signal<number>(0), topSignal: signal<number>(0), rightSignal: signal<number>(0), bottomSignal: signal<number>(0) }
+        : { left: 0, top: 0, right: 0, bottom: 0 };
     
     // Last know size
-    size: TrackerSize = { width: 0, height: 0 };
+    size: TrackerSize = config.useSignal
+        ? { width: 0, height: 0, widthSignal: signal<number>(0), heightSignal: signal<number>(0) }
+        : { width: 0, height: 0 };
 
     // Position relative to the relativeHTMLElement or window
-    relativePosition: TrackerPosition = { left: 0, top: 0, right: 0, bottom: 0 };
+    relativePosition: TrackerPosition = config.useSignal
+        ? { left: 0, top: 0, right: 0, bottom: 0, leftSignal: signal<number>(0), topSignal: signal<number>(0), rightSignal: signal<number>(0), bottomSignal: signal<number>(0) }
+        : { left: 0, top: 0, right: 0, bottom: 0 };
 
     // Change callbacks
     [PROP_CALLBACKS]: Set<TrackedCallbackItem> = new Set();
@@ -101,6 +117,10 @@ class Tracker {
             // Because we use getClientRects values are relative to the viewport already
             // so we only need to track the relative element if it's not a window
             this.relative = track(relativeHTMLElement);
+        }
+
+        if (config.useSignal) {
+            this[FN_ADD_TO_LOOP]();
         }
     }
     
@@ -254,7 +274,9 @@ class Tracker {
     update () {
         if (this[PROP_DIRTY]) {
             this[PROP_DIRTY] = false;
-            
+
+            // startBatch();
+
             const { element, relative, position, size, relativePosition } = this;
             const rects = element.getClientRects();
 
@@ -269,29 +291,55 @@ class Tracker {
                 const top = position.top = roundSubPixels(rect.top);
                 const right = position.right = roundSubPixels(rect.left + rect.width);
                 const bottom = position.bottom = roundSubPixels(rect.top + rect.height);
+                
+                if (config.useSignal) {
+                    position.leftSignal?.(left);
+                    position.topSignal?.(top);
+                    position.rightSignal?.(right);
+                    position.bottomSignal?.(bottom);
+                }
+
+                // Update size
                 const width = roundSubPixels(rect.width);
                 const height = roundSubPixels(rect.height);
 
+                if (size.width !== width || size.height !== height) {
+                    size.width = width;
+                    size.height = height;
+
+                    if (config.useSignal) {
+                        size.widthSignal?.(width);
+                        size.heightSignal?.(height);
+                    }
+
+                    this[PROP_SIZE_CHANGED] = true;
+                }
+                
+                // Update relative position
                 // We need to round sub-pixel values to avoid floating point errors because of transforms
                 const newLeft = relative ? roundSubPixels(left - relative.position.left) : left;
                 const newTop = relative ? roundSubPixels(top - relative.position.top) : top;
                 const newRight = relative ? roundSubPixels(relative.position.right - right) : roundSubPixels(document.documentElement.clientWidth - right);
                 const newBottom = relative ? roundSubPixels(relative.position.bottom - bottom) : roundSubPixels(window.innerHeight - bottom);
 
-                if (size.width !== width || size.height !== height) {
-                    size.width = width;
-                    size.height = height;
-                    this[PROP_SIZE_CHANGED] = true;
-                }
-
                 if (relativePosition.left !== newLeft || relativePosition.top !== newTop || relativePosition.right !== newRight || relativePosition.bottom !== newBottom) {
                     relativePosition.left = newLeft;
                     relativePosition.top = newTop;
                     relativePosition.right = newRight;
                     relativePosition.bottom = newBottom;
+
+                    if (config.useSignal) {
+                        relativePosition.leftSignal?.(newLeft);
+                        relativePosition.topSignal?.(newTop);
+                        relativePosition.rightSignal?.(newRight);
+                        relativePosition.bottomSignal?.(newBottom);
+                    }
+
                     this[PROP_POSITION_CHANGED] = true;
                 }
             }
+
+            // endBatch();
         }
     }
 

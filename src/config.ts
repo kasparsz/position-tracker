@@ -5,7 +5,7 @@ import frameLoop from "./frame-loop";
  * Global tracker configuration
  */
 export const config = {
-    useSignal: false,
+    useSignal: true,
 
     // Frame loop functions, allows to overwrite the default frame loop functions
     frameLoop,

@@ -36,5 +36,8 @@
   },
   "bugs": {
     "url": "https://github.com/kasparsz/position-tracker/issues"
+  },
+  "dependencies": {
+    "alien-signals": "^2.0.7"
   }
 }

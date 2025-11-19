@@ -38,7 +38,8 @@
 .box-list__box-viewport {
   border: 1px solid #0F0;
 }
-.box-list__box-virtual {
+.box-list__box-virtual,
+.box-list__box-virtual-signal {
   border: 1px solid #00F;
 }
 .box-list__box-virtual-box-preview {
@@ -51,7 +52,8 @@
   width: calc(100vw - 100px);
   height: calc(100svh - 100px);
 }
-.box-list__box-virtual:hover + .box-list__box-virtual-box-preview {
+.box-list__box-virtual:hover ~ .box-list__box-virtual-box-preview,
+.box-list__box-virtual-signal:hover ~ .box-list__box-virtual-box-preview {
   opacity: 1;
 }
 .box-list__box-sticky {

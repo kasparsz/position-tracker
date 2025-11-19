@@ -1,6 +1,6 @@
 {
-  "name": "position-tracker",
-  "version": "0.0.1",
+  "name": "@kasparsz/position-tracker",
+  "version": "0.1.0",
   "type": "module",
   "main": "./dist/position-tracker.umd.cjs",
   "module": "./dist/position-tracker.js",
@@ -14,7 +14,7 @@
     "./package.json": "./package.json"
   },
   "author": "Kaspars Zuks",
-  "license": "ISC",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && npm run compress && npm run check-compression-rate",

@@ -1,3 +1,5 @@
+import { frame } from '../../index';
+
 export function draggable (element: HTMLElement, callback: (position: { x: number, y: number }) => void) {
     const accumulatedPosition = { x: 0, y: 0 };
     const startPosition = { x: 0, y: 0 };
@@ -14,10 +16,12 @@ export function draggable (element: HTMLElement, callback: (position: { x: numbe
         position.x = event.clientX - startPosition.x;
         position.y = event.clientY - startPosition.y;
 
-        callback({
-            x: accumulatedPosition.x + position.x,
-            y: accumulatedPosition.y + position.y,
-        });
+        const eventX = accumulatedPosition.x + position.x;
+        const eventY = accumulatedPosition.y + position.y;
+
+        frame.update(() => {
+            callback({ x: eventX, y: eventY });
+        }, true);
     }
 
     element.draggable = false;

@@ -1,4 +1,3 @@
-import type { Tracker } from './index';
 
 const SYMBOL_TRACKER = Symbol();
 let uid = 0;
@@ -24,14 +23,14 @@ function getId (...elements: any[]): string {
 /**
  * A list of trackers.
  */
-export class TrackList {
-    trackers: Map<string, Tracker> = new Map<string, Tracker>();
+export class TrackList<T> {
+    trackers: Map<string, T> = new Map<string, T>();
 
     get size () {
         return this.trackers.size;
     }
 
-    get (...elements: any[]): Tracker | undefined {
+    get (...elements: any[]): T | undefined {
         return this.trackers.get(getId(...elements));
     }
 
@@ -39,7 +38,7 @@ export class TrackList {
         return this.trackers.has(getId(...elements));
     }
 
-    set (tracker: Tracker, ...elements: any[]) {
+    set (tracker: T, ...elements: any[]) {
         const id = getId(...elements);
         (tracker as any)[SYMBOL_TRACKER] = id;
         this.trackers.set(id, tracker);

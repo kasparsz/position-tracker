@@ -46,9 +46,14 @@ function iterateCallbacks (callbacks: Set<FrameLoopItem>, time: number) {
  * @param time - Current timestamp from requestAnimationFrame
  */
 function runStep (index: number, time: number) {
+    const markStart = performance.now();
     const callbacks = steps[STEP_NAMES[index]];
 
     iterateCallbacks(callbacks, time);
+
+    // Add timing marker in DevTools Performance panel
+    // @ts-ignore
+    console.timeStamp(STEP_NAMES[index], markStart, performance.now(), 'FrameLoop');
 
     if (index < STEP_NAMES.length - 1) {
         queueMicrotask(runStep.bind(null, index + 1, time));

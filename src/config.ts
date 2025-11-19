@@ -5,8 +5,6 @@ import frameLoop from "./frame-loop";
  * Global tracker configuration
  */
 export const config = {
-    useSignal: true,
-
     // Frame loop functions, allows to overwrite the default frame loop functions
     frameLoop,
 
@@ -29,4 +27,20 @@ export const config = {
     //         return () => cancelFrame(callback);
     //     },
     // },
+}
+
+// Because config can be overwritten, we need to create a wrapper for the frame loop functions
+export const frame = {
+    get setup () {
+        return config.frameLoop.setup;
+    },
+    get read () {
+        return config.frameLoop.read;
+    },
+    get update () {
+        return config.frameLoop.update;
+    },
+    get render () {
+        return config.frameLoop.render;
+    },
 }

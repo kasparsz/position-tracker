@@ -18,26 +18,6 @@ type TrackedCallbackItem = {
     once: boolean;
 }
 
-
-// Using symbols to prevent user from accessing the properties
-// and also to decrease the bundle size
-const PROP_CALLBACKS = Symbol();
-const PROP_DIRTY = Symbol();
-const PROP_POSITION_CHANGED = Symbol();
-const PROP_SIZE_CHANGED = Symbol();
-const PROP_IS_LOOP_ATTACHED = Symbol();
-const PROP_IS_PAUSED = Symbol();
-const PROP_REMOVE_LOOP_RESET = Symbol();
-const PROP_REMOVE_LOOP_READ = Symbol();
-const PROP_REMOVE_LOOP_UPDATE = Symbol();
-const PROP_REMOVE_RELATIVE_CHANGE_LISTENER = Symbol();
-
-const FN_OFF = Symbol();
-const FN_ADD_TO_LOOP = Symbol();
-const FN_REMOVE_FROM_LOOP = Symbol();
-const FN_RESET = Symbol();
-const FN_EMIT = Symbol();
-
 class Tracker {
     element: HTMLElement|Element;
     relative?: Tracker|VirtualTracker;
@@ -52,28 +32,28 @@ class Tracker {
     relativePosition: TrackerPositionSignal = trackerPosition(0, 0, 0, 0);
 
     // Change callbacks
-    [PROP_CALLBACKS]: Set<TrackedCallbackItem> = new Set();
+    #callbacks: Set<TrackedCallbackItem> = new Set();
 
     // Is dirty
-    [PROP_DIRTY]: boolean = true;
-
-    // Has changed
-    [PROP_POSITION_CHANGED]: boolean = false;
-    [PROP_SIZE_CHANGED]: boolean = false;
-
-    // Is tracker attached to the frame loop
-    [PROP_IS_LOOP_ATTACHED]: boolean = false;
+    #isDirty: boolean = true;
 
     // Is tracker paused, while paused it will not emit changes
-    [PROP_IS_PAUSED]: boolean = false;
+    #isPaused: boolean = false;
+
+    // Is tracker attached to the frame loop
+    #isLoopAttached: boolean = false;
+
+    // State of which properties changed
+    #didPositionChanged: boolean = false;
+    #didSizeChanged: boolean = false;
 
     // Loop callbacks
-    [PROP_REMOVE_LOOP_RESET]: (() => void) | null = null;
-    [PROP_REMOVE_LOOP_READ]: (() => void) | null = null;
-    [PROP_REMOVE_LOOP_UPDATE]: (() => void) | null = null;
+    #removeLoopReset: (() => void) | null = null;
+    #removeLoopRead: (() => void) | null = null;
+    #removeLoopUpdate: (() => void) | null = null;
 
     // Listener for relative tracker changes
-    [PROP_REMOVE_RELATIVE_CHANGE_LISTENER]: (() => void) | null = null;
+    #removeRelativeChangeListener: (() => void) | null = null;
 
     constructor (element: HTMLElement|Element, relativeHTMLElement?: HTMLElement|Element|Document|Window|VirtualTracker<TrackerPosition|TrackerPositionSignal|TrackerPositionAsSignal>) {
         this.element = element;
@@ -89,7 +69,7 @@ class Tracker {
             this.relative = track(relativeHTMLElement);
         }
 
-        this[FN_ADD_TO_LOOP]();
+        this.#addToLoop();
     }
     
     /**
@@ -98,22 +78,22 @@ class Tracker {
      * 
      * @private
      */
-    [FN_ADD_TO_LOOP] () {
-        if (!this[PROP_IS_LOOP_ATTACHED]) {
-            this[PROP_IS_LOOP_ATTACHED] = true;
+    #addToLoop () {
+        if (!this.#isLoopAttached) {
+            this.#isLoopAttached = true;
 
             // Mark that tracker was added, this is needed for signal batching
             addedTracker();
 
             // Add the tracker to the frame loop and save the remove function (to remove the tracker from the frame loop)
-            this[PROP_REMOVE_LOOP_RESET] = config.frameLoop.setup(this[FN_RESET].bind(this));
-            this[PROP_REMOVE_LOOP_READ] = config.frameLoop.read(this.update.bind(this));
-            this[PROP_REMOVE_LOOP_UPDATE] = config.frameLoop.update(this[FN_EMIT].bind(this));
+            this.#removeLoopReset = config.frameLoop.setup(this.#reset.bind(this));
+            this.#removeLoopRead = config.frameLoop.read(this.update.bind(this));
+            this.#removeLoopUpdate = config.frameLoop.update(this.#emit.bind(this));
 
             // Add empty listener to the relative tracker because tracker will not actually track changes until it's added to the frame loop
             // and it's only added to the frame loop when it has listeners
             if (this.relative && !isVirtualTracker(this.relative)) {
-                this[PROP_REMOVE_RELATIVE_CHANGE_LISTENER] = (this.relative as Tracker).on(voidCallback);
+                this.#removeRelativeChangeListener = (this.relative as Tracker).on(voidCallback);
             }
 
             if (!isVirtualTracker(this.relative)) {
@@ -130,20 +110,20 @@ class Tracker {
      * 
      * @private
      */
-    [FN_REMOVE_FROM_LOOP] (deleteFromList: boolean = true) {
-        if (this[PROP_IS_LOOP_ATTACHED]) {
-            this[PROP_IS_LOOP_ATTACHED] = false;
+    #removeFromLoop (deleteFromList: boolean = true) {
+        if (this.#isLoopAttached) {
+            this.#isLoopAttached = false;
 
             // Remove the tracker from the frame loop
-            this[PROP_REMOVE_LOOP_RESET]?.();
-            this[PROP_REMOVE_LOOP_READ]?.();
-            this[PROP_REMOVE_LOOP_UPDATE]?.();
-            this[PROP_REMOVE_RELATIVE_CHANGE_LISTENER]?.();
+            this.#removeLoopReset?.();
+            this.#removeLoopRead?.();
+            this.#removeLoopUpdate?.();
+            this.#removeRelativeChangeListener?.();
 
-            this[PROP_REMOVE_LOOP_RESET] = null;
-            this[PROP_REMOVE_LOOP_READ] = null;
-            this[PROP_REMOVE_LOOP_UPDATE] = null;
-            this[PROP_REMOVE_RELATIVE_CHANGE_LISTENER] = null;
+            this.#removeLoopReset = null;
+            this.#removeLoopRead = null;
+            this.#removeLoopUpdate = null;
+            this.#removeRelativeChangeListener = null;
 
             // Mark that tracker was removed, this is needed for signal batching
             removedTracker();
@@ -168,7 +148,7 @@ class Tracker {
 
         const item: TrackedCallbackItem = {
             callback: !once ? callback : (() => {
-                this[FN_OFF](item);
+                this.#removeEventListener(item);
                 callback(this);
             }),
             position,
@@ -176,11 +156,11 @@ class Tracker {
             once,
         };
 
-        this[PROP_CALLBACKS].add(item);
-        this[FN_ADD_TO_LOOP]();
+        this.#callbacks.add(item);
+        this.#addToLoop();
 
         // Return a function to remove the callback
-        return this[FN_OFF].bind(this, item);
+        return this.#removeEventListener.bind(this, item);
     }
 
     /**
@@ -189,9 +169,9 @@ class Tracker {
      * @param callback - The callback function to remove
      */
     off (callback: TrackerCallback) {
-        this[PROP_CALLBACKS].forEach((item) => {
+        this.#callbacks.forEach((item) => {
             if (item.callback === callback) {
-                this[FN_OFF](item);
+                this.#removeEventListener(item);
             }
         });
     }
@@ -200,18 +180,18 @@ class Tracker {
      * Pause tracking
      */
     pause () {
-        this[PROP_IS_PAUSED] = true;
-        this[FN_REMOVE_FROM_LOOP](false);
+        this.#isPaused = true;
+        this.#removeFromLoop(false);
     }
 
     /**
      * Resume tracking
      */
     resume () {
-        this[PROP_IS_PAUSED] = false;
+        this.#isPaused = false;
 
-        if (this[PROP_CALLBACKS].size) {
-            this[FN_ADD_TO_LOOP]();
+        if (this.#callbacks.size) {
+            this.#addToLoop();
         }
     }
 
@@ -221,11 +201,11 @@ class Tracker {
      * @param item - The callback item to remove
      * @private
      */
-    [FN_OFF] (item: TrackedCallbackItem) {
-        this[PROP_CALLBACKS].delete(item);
+    #removeEventListener (item: TrackedCallbackItem) {
+        this.#callbacks.delete(item);
 
-        if (!this[PROP_CALLBACKS].size) {
-            this[FN_REMOVE_FROM_LOOP]();
+        if (!this.#callbacks.size) {
+            this.#removeFromLoop();
         }
     }
 
@@ -235,10 +215,10 @@ class Tracker {
      * 
      * @private
      */
-    [FN_RESET] () {
-        this[PROP_DIRTY] = true;
-        this[PROP_POSITION_CHANGED] = false;
-        this[PROP_SIZE_CHANGED] = false;
+    #reset () {
+        this.#isDirty = true;
+        this.#didPositionChanged = false;
+        this.#didSizeChanged = false;
     }
 
     /**
@@ -246,8 +226,8 @@ class Tracker {
      * Called by the frame loop
      */
     update () {
-        if (this[PROP_DIRTY]) {
-            this[PROP_DIRTY] = false;
+        if (this.#isDirty && !this.#isPaused) {
+            this.#isDirty = false;
 
             const { element, relative, position, size, relativePosition } = this;
             const sizeJSON = size.toJSON();
@@ -281,7 +261,7 @@ class Tracker {
                     size.width(width);
                     size.height(height);
 
-                    this[PROP_SIZE_CHANGED] = true;
+                    this.#didSizeChanged = true;
                 }
                 
                 // Update relative position
@@ -297,7 +277,7 @@ class Tracker {
                     relativePosition.right(newRight);
                     relativePosition.bottom(newBottom);
 
-                    this[PROP_POSITION_CHANGED] = true;
+                    this.#didPositionChanged = true;
                 }
             }
         }
@@ -309,9 +289,9 @@ class Tracker {
      * 
      * @private
      */
-    [FN_EMIT] () {
-        this[PROP_CALLBACKS].forEach((item) => {
-            if ((item.position && this[PROP_POSITION_CHANGED]) || (item.size && this[PROP_SIZE_CHANGED])) {
+    #emit () {
+        this.#callbacks.forEach((item) => {
+            if ((item.position && this.#didPositionChanged) || (item.size && this.#didSizeChanged)) {
                 item.callback(this);
             }
         });

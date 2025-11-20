@@ -18,17 +18,17 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && npm run compress && npm run check-compression-rate",
-    "compress": "terser --compress  --mangle --module dist/position-tracker.js -o dist/position-tracker.min.js",
+    "compress": "terser --compress  --mangle --module --config-file=\"terserconfig.json\" dist/position-tracker.js -o dist/position-tracker.min.js",
     "check-compression-rate": "node check-compression-rate.js",
     "preview": "vite preview",
     "test": "vitest --run"
   },
   "devDependencies": {
     "terser": "^5.43.1",
-    "typescript": "~5.8.3",
+    "typescript": "~5.9.3",
     "vite": "npm:rolldown-vite@latest",
     "vite-plugin-dts": "^4.5.4",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.12"
   },
   "repository": {
     "type": "git",
@@ -38,6 +38,6 @@
     "url": "https://github.com/kasparsz/position-tracker/issues"
   },
   "dependencies": {
-    "alien-signals": "^2.0.7"
+    "alien-signals": "^3.1.0"
   }
 }

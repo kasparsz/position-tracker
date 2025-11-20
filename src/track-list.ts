@@ -1,5 +1,5 @@
 
-const SYMBOL_TRACKER = Symbol();
+const TRACKER_PROPERTY = Symbol();
 let uid = 0;
 
 /**
@@ -12,10 +12,10 @@ function getId (...elements: any[]): string {
     return elements
         .filter((element) => !!element)
         .map((element) => {
-            if (element[SYMBOL_TRACKER]) {
-                return element[SYMBOL_TRACKER];
+            if (element[TRACKER_PROPERTY]) {
+                return element[TRACKER_PROPERTY];
             } else {
-                return element[SYMBOL_TRACKER] = uid++;
+                return element[TRACKER_PROPERTY] = uid++;
             }
         }).join('-');
 }
@@ -40,7 +40,7 @@ export class TrackList<T> {
 
     set (tracker: T, ...elements: any[]) {
         const id = getId(...elements);
-        (tracker as any)[SYMBOL_TRACKER] = id;
+        (tracker as any)[TRACKER_PROPERTY] = id;
         this.trackers.set(id, tracker);
     }
 

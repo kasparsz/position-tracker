@@ -1,0 +1,13 @@
+{
+    "mangle": {
+        "module": true,
+        "toplevel": true,
+        "keep_classnames": true,
+        "keep_fnames": true,
+        "properties": true
+    },
+    "compress": {
+        "hoist_funs": true,
+        "passes": 2
+    }
+}

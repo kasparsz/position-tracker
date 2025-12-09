@@ -1,6 +1,7 @@
 import { track } from '../tracker';
 import { draggable } from './preview/draggable';
 import { highlighter } from './preview/highlighter';
+import { line } from './preview/line';
 
 import { signal, effect } from 'alien-signals';
 
@@ -52,6 +53,7 @@ function trackVirtualElementWithDraggable (element: HTMLElement) {
     // }, 1000);
 
     const tracker = track(element, virtualTracker);
+    line(tracker);
     
     effect(() => {
         (element as HTMLElement).innerText = `virtual\n${tracker.relativePosition.left().toFixed(0)} x ${tracker.relativePosition.top().toFixed(0)}`;
@@ -83,6 +85,7 @@ function trackVirtualSignalElementWithDraggable (element: HTMLElement) {
     // }, 1000);
 
     const tracker = track(element, virtualTracker);
+    line(tracker);
     
     effect(() => {
         (element as HTMLElement).innerText = `virtual signal\n${tracker.relativePosition.left().toFixed(0)} x ${tracker.relativePosition.top().toFixed(0)}`;
@@ -99,7 +102,8 @@ function trackRelativeElementWithDraggable (elements: HTMLElement[]) {
     const trackerA = track(elements[0], elements[1]);
     const trackerB = track(elements[1], elements[2]);
 
-    // trackDocumentElementWithDraggable(target);
+    line(trackerA);
+    line(trackerB);
 
     elements.forEach((element) => {
         draggable(element, (position: { x: number, y: number }) => {

@@ -1,4 +1,5 @@
 import { signal } from 'alien-signals';
+import type { SignalType } from './signal';
 
 export type TrackerSize = {
     width: number;
@@ -7,8 +8,8 @@ export type TrackerSize = {
 
 export type TrackerSizeSignal = {
     _value: TrackerSize;
-    width: ReturnType<typeof signal<number>>;
-    height: ReturnType<typeof signal<number>>;
+    width: SignalType<number>;
+    height: SignalType<number>;
     toJSON (): TrackerSize;
 }
 

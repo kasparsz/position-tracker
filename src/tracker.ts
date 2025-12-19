@@ -5,6 +5,8 @@ import { trackerSize, type TrackerSizeSignal } from './tracker-size';
 import { trackerPosition, type TrackerPositionSignal, type TrackerPosition, type TrackerPositionAsSignal } from './tracker-position';
 import { addedTracker, removedTracker } from './signal-batch';
 import { unsignalifyVirtualTracker, isVirtualTracker, type VirtualTracker } from './virtual-tracker';
+import { signal } from 'alien-signals';
+import type { SignalType } from './signal';
 
 // Global tracker list
 const trackerList = new TrackList<Tracker>();
@@ -31,6 +33,9 @@ class Tracker {
     // Position relative to the relativeHTMLElement or window
     relativePosition: TrackerPositionSignal = trackerPosition(0, 0, 0, 0);
 
+    // Element is visible or not
+    visible: SignalType<boolean> = signal(false);
+
     // Change callbacks
     #callbacks: Set<TrackedCallbackItem> = new Set();
 
@@ -46,6 +51,7 @@ class Tracker {
     // State of which properties changed
     #didPositionChanged: boolean = false;
     #didSizeChanged: boolean = false;
+    #didVisibleChanged: boolean = false;
 
     // Loop callbacks
     #removeLoopReset: (() => void) | null = null;
@@ -216,6 +222,7 @@ class Tracker {
         this.#isDirty = true;
         this.#didPositionChanged = false;
         this.#didSizeChanged = false;
+        this.#didVisibleChanged = false;
     }
 
     /**
@@ -226,7 +233,7 @@ class Tracker {
         if (this.#isDirty && !this.#isPaused) {
             this.#isDirty = false;
 
-            const { element, relative, position, size, relativePosition } = this;
+            const { element, relative, position, size, relativePosition, visible } = this;
             const sizeJSON = size.toJSON();
             const positionJSON = position.toJSON();
             const relativePositionJSON = relativePosition.toJSON();
@@ -276,6 +283,16 @@ class Tracker {
 
                     this.#didPositionChanged = true;
                 }
+
+                if (!visible()) {
+                    visible(true);
+                    this.#didVisibleChanged = true;
+                }
+            } else {
+                if (visible()) {
+                    visible(false);
+                    this.#didVisibleChanged = true;
+                }
             }
         }
     }
@@ -298,7 +315,7 @@ class Tracker {
      */
     #emit () {
         this.#callbacks.forEach((item) => {
-            if ((item.position && this.#didPositionChanged) || (item.size && this.#didSizeChanged)) {
+            if ((item.position && this.#didPositionChanged) || (item.size && this.#didSizeChanged) || this.#didVisibleChanged) {
                 item.callback(this);
             }
         });

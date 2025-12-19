@@ -29,6 +29,7 @@ const tracker = track(element);
 const removeListener = tracker.on((t) => {
   console.log('Position:', t.relativePosition.toJSON()); // => { left: 0, top: 0, right: 0, bottom: 0 }
   console.log('Size:', t.size.toJSON()); // => { width: 0, height: 0 }
+  console.log('Visible:', t.visible()); // => true or false
 });
 
 // To stop tracking
@@ -68,7 +69,10 @@ effect(() => {
 });
 effect(() => {
   console.log('Size changed:', tracker.size.width(), tracker.size.height());
-});s
+});
+effect(() => {
+  console.log('Visible changed:', tracker.visible());
+});
 ```
 
 ### Virtual Trackers
@@ -125,6 +129,7 @@ Returns a `Tracker` instance.
 - `position`: `TrackerPositionSignal` - Global position relative to the viewport.
 - `size`: `TrackerSizeSignal` - Element dimensions.
 - `relativePosition`: `TrackerPositionSignal` - Position relative to the `relativeTo` target.
+- `visible`: `SignalType<boolean>` - Element visibility.
 
 #### Methods
 - `on(callback, options?)`: Add a change listener. Returns an unsubscribe function.

@@ -64,8 +64,8 @@ function runStep (index: number, time: number) {
  * Main tick function that runs the frame loop
  */
 function tick () {
-    requestAnimationFrame(tick);
     runStep(0, performance.now());
+    requestAnimationFrame(tick);
 }
 
 /**

@@ -189,10 +189,7 @@ class Tracker {
      */
     resume () {
         this.#isPaused = false;
-
-        if (this.#callbacks.size) {
-            this.#addToLoop();
-        }
+        this.#addToLoop();
     }
 
     /**
@@ -281,6 +278,16 @@ class Tracker {
                 }
             }
         }
+    }
+
+    /**
+     * Destroy the tracker
+     */
+    destroy () {
+        this.#removeFromLoop();
+        this.#callbacks.clear();
+        this.relative = undefined;
+        this.#isPaused = true;
     }
 
     /**

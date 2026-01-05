@@ -1,10 +1,10 @@
 # @kasparsz/position-tracker
 
-A high-performance, reactive element position and size tracker for the web, powered by [alien-signals](https://github.com/solidjs-community/alien-signals).
+A high-performance, reactive element position and size tracker for the web, powered by [alien-signals](https://github.com/stackblitz/alien-signals).
 
 ## Features
 
-- 🚀 **High Performance**: Optimized frame loop to minimize layout thrashing and unnecessary computations.
+- 🚀 **High Performance**: Optimized frame loop to batch read/write DOM operations and minimize layout thrashing and unnecessary computations.
 - ⚡ **Reactive**: Seamlessly integrates with `alien-signals` for efficient state management and updates.
 - 📏 **Relative Tracking**: Track elements relative to other elements, the window, or custom virtual trackers.
 - 🧩 **Virtual Trackers**: Define custom tracking points or regions not directly tied to a DOM element.

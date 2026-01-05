@@ -1,6 +1,6 @@
 import { roundSubPixels } from './utils/round';
 import { TrackList } from './track-list';
-import { config } from './config';
+import { frame } from './config';
 import { trackerSize, type TrackerSizeSignal } from './tracker-size';
 import { trackerPosition, type TrackerPositionSignal, type TrackerPosition, type TrackerPositionAsSignal } from './tracker-position';
 import { addedTracker, removedTracker } from './signal-batch';
@@ -92,9 +92,9 @@ class Tracker {
             addedTracker();
 
             // Add the tracker to the frame loop and save the remove function (to remove the tracker from the frame loop)
-            this.#removeLoopReset = config.frameLoop.setup(this.#reset.bind(this));
-            this.#removeLoopRead = config.frameLoop.read(this.update.bind(this));
-            this.#removeLoopUpdate = config.frameLoop.update(this.#emit.bind(this));
+            this.#removeLoopReset = frame.setup(this.#reset.bind(this));
+            this.#removeLoopRead = frame.read(this.update.bind(this));
+            this.#removeLoopUpdate = frame.update(this.#emit.bind(this));
 
             // Add empty listener to the relative tracker because tracker will not actually track changes until it's added to the frame loop
             // and it's only added to the frame loop when it has listeners

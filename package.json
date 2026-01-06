@@ -1,6 +1,6 @@
 {
   "name": "@kasparsz/position-tracker",
-  "version": "0.1.1",
+  "version": "0.2",
   "type": "module",
   "main": "./dist/position-tracker.umd.cjs",
   "module": "./dist/position-tracker.js",

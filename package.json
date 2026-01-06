@@ -1,6 +1,6 @@
 {
   "name": "@kasparsz/position-tracker",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "main": "./dist/position-tracker.umd.cjs",
   "module": "./dist/position-tracker.js",
@@ -21,6 +21,7 @@
     "compress": "terser --compress  --mangle --module --config-file=\"terserconfig.json\" dist/position-tracker.js -o dist/position-tracker.min.js",
     "check-compression-rate": "node check-compression-rate.js",
     "preview": "vite preview",
+    "prepublish": "npm run build",
     "test": "vitest --run"
   },
   "devDependencies": {

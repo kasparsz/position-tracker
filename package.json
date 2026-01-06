@@ -1,6 +1,6 @@
 {
   "name": "@kasparsz/position-tracker",
-  "version": "0.2.1",
+  "version": "0.2.7",
   "type": "module",
   "main": "./dist/position-tracker.umd.cjs",
   "module": "./dist/position-tracker.js",
@@ -8,10 +8,14 @@
   "exports": {
     ".": {
       "import": "./dist/position-tracker.js",
+      "require": "./dist/position-tracker.umd.cjs",
       "types": "./dist/position-tracker.d.ts",
-      "default": "./dist/position-tracker.umd.cjs"
+      "module": "./dist/position-tracker.js"
     },
     "./package.json": "./package.json"
+  },
+  "browser": {
+    "alien-signals": "alien-signals/esm/index.mjs"
   },
   "author": "Kaspars Zuks",
   "license": "MIT",
@@ -39,9 +43,12 @@
     "url": "https://github.com/kasparsz/position-tracker/issues"
   },
   "dependencies": {
-    "alien-signals": "^3.1.1"
+    "alien-signals": "^3.1.2"
   },
   "volta": {
     "node": "24.12.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }

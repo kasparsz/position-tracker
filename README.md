@@ -142,14 +142,14 @@ Returns a `Tracker` instance.
 ## Frame loop
 
 The frame loop is a loop that runs on each frame and is optimized to prevent layout thrashing and unnecessary computations.  
-It's integral part of the position tracking, but can be also used separately.
+It's integral part of the position tracking, but it can be used separately too.
 
-On each frame frame loop executed following steps:
+On each frame it executes following steps:
 
-1. `setup` - intended to perform any setup operations
-2. `read` - intended to read the DOM or other state
-3. `update` - intended to update the state
-4. `render` - intended to render the state to the DOM
+1. `setup(fn, [once])` - intended to perform any setup operations
+2. `read(fn, [once])` - intended to read the DOM or other state
+3. `update(fn, [once])` - intended to update the state
+4. `render(fn, [once])` - intended to render the state to the DOM
 
 ```typescript
 import { frame } from '@kasparsz/position-tracker';
@@ -171,17 +171,21 @@ frame.render(() => {
 });
 ```
 
-Scheduling one of the next steps will execute it in the same frame loop, but scheduling preceding steps will execute them in the next frame loop.
+Scheduling one of the next steps (or current step) will execute it in the same tick, but scheduling preceding steps will execute them in the next tick.
 
 ```typescript
 import { frame } from '@kasparsz/position-tracker';
 
-frame.read(() => {
-  console.log('Frame loop read');
+frame.update(() => {
+  console.log('Frame loop update');
 
-  // Same frame loop
-  frame.render(() => {
-    console.log('Frame loop render');
+  // Same tick
+  frame.update(() => {
+  });
+
+  // Next tick
+  frame.read(() => {
+    console.log('Frame loop read');
   }, true);
 });
 ```
@@ -192,7 +196,7 @@ import { frame } from '@kasparsz/position-tracker';
 frame.update(() => {
   console.log('Frame loop update');
 
-  // Next frame loop
+  // Next tick
   frame.read(() => {
     console.log('Frame loop read');
   }, true);

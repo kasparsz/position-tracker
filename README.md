@@ -26,14 +26,27 @@ const element = document.querySelector('.my-element');
 const tracker = track(element);
 
 // Listen for changes
-const removeListener = tracker.on((t) => {
-  console.log('Position:', t.relativePosition.toJSON()); // => { left: 0, top: 0, right: 0, bottom: 0 }
-  console.log('Size:', t.size.toJSON()); // => { width: 0, height: 0 }
-  console.log('Visible:', t.visible()); // => true or false
-});
+function onChange (tracker) {
+  console.log('Position:', tracker.relativePosition.toJSON()); // => { left: 0, top: 0, right: 0, bottom: 0 }
+  console.log('Left:', tracker.relativePosition.left()); // => 0
+  console.log('Top:', tracker.relativePosition.top()); // => 0
+  console.log('Right:', tracker.relativePosition.right()); // => 0
+  console.log('Bottom:', tracker.relativePosition.bottom()); // => 0
+
+  console.log('Size:', tracker.size.toJSON()); // => { width: 0, height: 0 }
+  console.log('Width:', tracker.size.width()); // => 0
+  console.log('Height:', tracker.size.height()); // => 0
+  
+  console.log('Visible:', tracker.visible()); // => true or false
+}
+
+const removeListener = tracker.on(onChange);
 
 // To stop tracking
 // removeListener();
+
+// or
+// tracker.off(onChange);
 ```
 
 ## Usage

@@ -68,7 +68,6 @@ class Tracker {
             // Virtual tracker is a tracker that is not attached to the DOM,
             // coordinates are relative to the viewport
             this.relative = unsignalifyVirtualTracker(relativeHTMLElement);
-            // console.log(this.relative);
         } else if (relativeHTMLElement && !(relativeHTMLElement instanceof Window)) {
             // Because we use getClientRects values are relative to the viewport already
             // so we only need to track the relative element if it's not a window
@@ -102,11 +101,7 @@ class Tracker {
                 this.#removeRelativeChangeListener = (this.relative as Tracker).on(voidCallback);
             }
 
-            if (!isVirtualTracker(this.relative)) {
-                trackerList.set(this, this.element);
-            } else {
-                trackerList.set(this, this.element, (this.relative as Tracker)?.element);
-            }
+            trackerList.set(this, this.element, this.relative ? (this.relative as Tracker)?.element : null);
         }
     }
 

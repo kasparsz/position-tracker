@@ -9,8 +9,8 @@ export type SignalType<T> = ReturnType<typeof signal<T>>;
  * @returns The unsignalified value
  */
 export function unSignal<T> (value: SignalType<T>|T):typeof value extends SignalType<T> ? T : T {
-    if (value instanceof signal && (isSignal(value) || isComputed(value))) {
-        return value() as T;
+    if (value && (isSignal(value as any) || isComputed(value as any))) {
+        return (value as () => void)() as T;
     } else {
         // Using `as` is dirty, should fix this
         return value as T;

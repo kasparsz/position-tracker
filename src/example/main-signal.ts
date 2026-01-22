@@ -2,34 +2,49 @@ import { track } from '../tracker';
 import { draggable } from './preview/draggable';
 import { highlighter } from './preview/highlighter';
 import { line } from './preview/line';
+import { removeable } from './preview/removeable';
 
 import { signal, effect } from 'alien-signals';
 
 function trackWindowElementWithDraggable (element: HTMLElement) {
-    const highlight = highlighter(element);
-    const tracker = track(element, window);
-
-    effect(() => {
-        highlight.highlight();
-        (element as HTMLElement).innerText = `window\n${tracker.relativePosition.left().toFixed(0)} x ${tracker.relativePosition.top().toFixed(0)}`;
+    removeable(element, () => {
+        removeEffect();
+        removeDraggable();
+        tracker.destroy();
     });
 
-    draggable(element, (position: { x: number, y: number }) => {
+    const highlight = highlighter(element);
+    const tracker = track(element, window);
+    const textElement = element.querySelector('span') || element;
+
+    const removeEffect = effect(() => {
+        highlight.highlight();
+        (textElement as HTMLElement).innerText = `window\n${tracker.relativePosition.left().toFixed(0)} x ${tracker.relativePosition.top().toFixed(0)}`;
+    });
+
+    const removeDraggable = draggable(element, (position: { x: number, y: number }) => {
         element.style.transform = `translate(${position.x}px, ${position.y}px)`;
     });
 }
 
 function trackDocumentElementWithDraggable (element: HTMLElement) {
+    removeable(element, () => {
+        removeEffect();
+        removeDraggable();
+        tracker.destroy();
+    });
+
     const highlight = highlighter(element);
     const tracker = track(element, document);
+    const textElement = element.querySelector('span') || element;
 
-    draggable(element, (position: { x: number, y: number }) => {
+    const removeDraggable = draggable(element, (position: { x: number, y: number }) => {
         if (element.style) element.style.transform = `translate(${position.x}px, ${position.y}px)`;
     });
 
-    effect(() => {
+    const removeEffect = effect(() => {
         highlight.highlight();
-        (element as HTMLElement).innerText = `body\n${tracker.relativePosition.left().toFixed(0)} x ${tracker.relativePosition.top().toFixed(0)}`;
+        (textElement as HTMLElement).innerText = `body\n${tracker.relativePosition.left().toFixed(0)} x ${tracker.relativePosition.top().toFixed(0)}`;
     });
 }
 

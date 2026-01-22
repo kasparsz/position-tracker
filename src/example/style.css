@@ -23,10 +23,25 @@
 }
 
 .box-list__box {
+  position: relative;
   width: var(--box-size);
   height: var(--box-size);
   border: 1px solid #000;
   border-radius: 2px;
+}
+.box-list__box-remove {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  border: 0;
+  background: #000;
+  border-radius: 2px;
+  color: #fff;
+  width: 20px;
+  height: 20px;
+  text-transform: uppercase;
+  text-box: trim-both cap alphabetic;
 }
 .box-list__box-line {
   width: fit-content;

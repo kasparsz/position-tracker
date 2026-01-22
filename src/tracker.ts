@@ -1,5 +1,4 @@
 import { roundSubPixels } from './utils/round';
-import { TrackList } from './track-list';
 import { frame } from './config';
 import { trackerSize, type TrackerSizeSignal } from './tracker-size';
 import { trackerPosition, type TrackerPositionSignal, type TrackerPosition, type TrackerPositionAsSignal } from './tracker-position';
@@ -9,7 +8,6 @@ import { signal } from 'alien-signals';
 import type { SignalType } from './signal';
 
 // Global tracker list
-const trackerList = new TrackList<Tracker>();
 const voidCallback = () => {};
 
 type TrackerCallback = (tracker: Tracker) => void;
@@ -100,8 +98,6 @@ class Tracker {
             if (this.relative && !isVirtualTracker(this.relative)) {
                 this.#removeRelativeChangeListener = (this.relative as Tracker).on(voidCallback);
             }
-
-            trackerList.set(this, this.element, this.relative ? (this.relative as Tracker)?.element : null);
         }
     }
 
@@ -111,7 +107,7 @@ class Tracker {
      * 
      * @private
      */
-    #removeFromLoop (deleteFromList: boolean = true) {
+    #removeFromLoop () {
         if (this.#isLoopAttached) {
             this.#isLoopAttached = false;
 
@@ -128,10 +124,6 @@ class Tracker {
 
             // Mark that tracker was removed, this is needed for signal batching
             removedTracker();
-
-            if (deleteFromList) {
-                trackerList.delete(this);
-            }
         }
     }
 
@@ -182,7 +174,7 @@ class Tracker {
      */
     pause () {
         this.#isPaused = true;
-        this.#removeFromLoop(false);
+        this.#removeFromLoop();
     }
 
     /**
@@ -333,11 +325,7 @@ export function track (element: HTMLElement|Element|Document, relativeElement?: 
     // returns values that are relative to the window already
     const relativeHTMLElement = relativeElement instanceof Window ? undefined : relativeElement;
 
-    if (trackerList.has(htmlElement, relativeHTMLElement)) {
-        return trackerList.get(htmlElement, relativeHTMLElement)!;
-    } else {
-        return new Tracker(htmlElement, relativeHTMLElement);
-    }
+    return new Tracker(htmlElement, relativeHTMLElement);
 }
 
 export type { Tracker, TrackerCallback };

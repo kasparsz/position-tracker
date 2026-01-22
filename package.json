@@ -1,6 +1,6 @@
 {
   "name": "@kasparsz/position-tracker",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "type": "module",
   "main": "./dist/position-tracker.umd.cjs",
   "module": "./dist/position-tracker.js",
@@ -15,7 +15,7 @@
     "./package.json": "./package.json"
   },
   "browser": {
-    "alien-signals": "alien-signals/esm/index.mjs"
+    "alien-signals": "alien-signals/esm"
   },
   "author": "Kaspars Zuks",
   "license": "MIT",

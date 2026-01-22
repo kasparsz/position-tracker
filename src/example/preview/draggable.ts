@@ -4,6 +4,7 @@ export function draggable (element: HTMLElement, callback: (position: { x: numbe
     const accumulatedPosition = { x: 0, y: 0 };
     const startPosition = { x: 0, y: 0 };
     const position = { x: 0, y: 0 };
+    const destroyAbortController = new AbortController();
     let abortController: AbortController | null = null;
 
     function onDragStop () {
@@ -40,5 +41,9 @@ export function draggable (element: HTMLElement, callback: (position: { x: numbe
         document.addEventListener('pointermove', onDrag, { signal: abortController.signal });
 
         event.preventDefault();
-    });
+    }, { signal: destroyAbortController.signal });
+
+    return function () {
+        destroyAbortController.abort();
+    };
 }

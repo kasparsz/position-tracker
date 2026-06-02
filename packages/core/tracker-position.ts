@@ -1,5 +1,4 @@
-import { signal, unSignal } from './signal';
-import type { SignalType } from './signal';
+import { config } from './config';
 
 const SYMBOL_IS_SIGNAL_TRACKER_POSITION = Symbol('isSignalTrackerPosition');
 
@@ -13,19 +12,19 @@ export type TrackerPosition = {
 
 export type TrackerPositionAsSignal = {
     [SYMBOL_IS_SIGNAL_TRACKER_POSITION]?: true;
-    left: SignalType<number>;
-    top: SignalType<number>;
-    right: SignalType<number>;
-    bottom: SignalType<number>;
+    left: any;
+    top: any;
+    right: any;
+    bottom: any;
 }
 
 export type TrackerPositionSignal = {
     [SYMBOL_IS_SIGNAL_TRACKER_POSITION]?: true;
     _value: TrackerPosition;
-    left: SignalType<number>;
-    top: SignalType<number>;
-    right: SignalType<number>;
-    bottom: SignalType<number>;
+    left: any;
+    top: any;
+    right: any;
+    bottom: any;
     toJSON: () => TrackerPosition;
 }
 
@@ -61,15 +60,15 @@ export function trackerPosition (left: number, top: number, right: number, botto
             right,
             bottom
         },
-        left: signal(left),
-        top: signal(top),
-        right: signal(right),
-        bottom: signal(bottom),
+        left: config.signal.signal(left),
+        top: config.signal.signal(top),
+        right: config.signal.signal(right),
+        bottom: config.signal.signal(bottom),
         toJSON () {
-            this._value.left = unSignal(this.left);
-            this._value.top = unSignal(this.top);
-            this._value.right = unSignal(this.right);
-            this._value.bottom = unSignal(this.bottom);
+            this._value.left = config.signal.unSignal(this.left);
+            this._value.top = config.signal.unSignal(this.top);
+            this._value.right = config.signal.unSignal(this.right);
+            this._value.bottom = config.signal.unSignal(this.bottom);
             return this._value;
         }
     };

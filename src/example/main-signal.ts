@@ -4,7 +4,7 @@ import { highlighter } from './preview/highlighter';
 import { line } from './preview/line';
 import { removeable } from './preview/removeable';
 
-import { signal, effect } from 'alien-signals';
+import { signal, effect } from '../signal';
 
 function trackWindowElementWithDraggable (element: HTMLElement) {
     removeable(element, () => {

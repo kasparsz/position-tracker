@@ -1,5 +1,4 @@
-import { signal } from './signal';
-import type { SignalType } from './signal';
+import { config } from './config';
 
 export type TrackerSize = {
     width: number;
@@ -8,19 +7,19 @@ export type TrackerSize = {
 
 export type TrackerSizeSignal = {
     _value: TrackerSize;
-    width: SignalType<number>;
-    height: SignalType<number>;
+    width: any;
+    height: any;
     toJSON (): TrackerSize;
 }
 
 export function trackerSize (width: number, height: number): TrackerSizeSignal {
     return {
         _value: { width, height },
-        width: signal(width),
-        height: signal(height),
+        width: config.signal.signal(width),
+        height: config.signal.signal(height),
         toJSON () {
-            this._value.width = this.width();
-            this._value.height = this.height();
+            this._value.width = config.signal.unSignal(this.width);
+            this._value.height = config.signal.unSignal(this.height);
             return this._value;
         }
     };

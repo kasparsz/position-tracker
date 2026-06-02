@@ -1,4 +1,3 @@
-import { startBatch, endBatch } from './signal';
 import { config } from './config';
 
 // Count of trackers, we add batching when first tracker is added and remove it when last tracker is removed
@@ -14,10 +13,10 @@ let removeUpdateListener = () => {};
 function addedTracker () {
     if (!trackerCount) {
         removeReadListener = config.frameLoop.read(() => {
-            startBatch();
+            config.signal.startBatch();
         });
         removeUpdateListener = config.frameLoop.update(() => {
-            endBatch();
+            config.signal.endBatch();
         });
     }
 

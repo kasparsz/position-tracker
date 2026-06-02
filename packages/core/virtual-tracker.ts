@@ -1,6 +1,6 @@
 import { type Tracker } from './tracker';
 import { type TrackerPositionSignal, type TrackerPosition, type TrackerPositionAsSignal, isSignalTrackerPosition } from './tracker-position';
-import { unSignal } from './signal';
+import { config } from './config';
 
 export type VirtualTracker<T = TrackerPosition|TrackerPositionSignal> = {
     position: T;
@@ -23,20 +23,20 @@ export function unsignalifyVirtualTracker (tracker: Tracker|VirtualTracker<Track
     if (isVirtualTracker<typeof tracker>(tracker) && isSignalTrackerPosition(position)) {
         return {
             position: {
-                left: unSignal(position.left),
-                top: unSignal(position.top),
-                right: unSignal(position.right),
-                bottom: unSignal(position.bottom)
+                left: config.signal.unSignal(position.left),
+                top: config.signal.unSignal(position.top),
+                right: config.signal.unSignal(position.right),
+                bottom: config.signal.unSignal(position.bottom)
             },
             update() {
                 if (tracker.update) {
                     tracker.update();
                 }
 
-                this.position.left = unSignal(position.left);
-                this.position.top = unSignal(position.top);
-                this.position.right = unSignal(position.right);
-                this.position.bottom = unSignal(position.bottom);
+                this.position.left = config.signal.unSignal(position.left);
+                this.position.top = config.signal.unSignal(position.top);
+                this.position.right = config.signal.unSignal(position.right);
+                this.position.bottom = config.signal.unSignal(position.bottom);
             }
         }
     } else {

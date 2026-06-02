@@ -4,8 +4,7 @@ import { trackerSize, type TrackerSizeSignal } from './tracker-size';
 import { trackerPosition, type TrackerPositionSignal, type TrackerPosition, type TrackerPositionAsSignal } from './tracker-position';
 import { addedTracker, removedTracker } from './signal-batch';
 import { unsignalifyVirtualTracker, isVirtualTracker, type VirtualTracker } from './virtual-tracker';
-import { signal, setSignal, unSignal } from './signal';
-import type { SignalType } from './signal';
+import { config } from './config';
 
 // Global tracker list
 const voidCallback = () => {};
@@ -32,7 +31,7 @@ class Tracker {
     relativePosition: TrackerPositionSignal = trackerPosition(0, 0, 0, 0);
 
     // Element is visible or not
-    visible: SignalType<boolean> = signal(false);
+    visible: any = config.signal.signal(false);
 
     // Change callbacks
     #callbacks: Set<TrackedCallbackItem> = new Set();
@@ -239,18 +238,18 @@ class Tracker {
                 const right = positionJSON.right = roundSubPixels(rect.left + rect.width);
                 const bottom = positionJSON.bottom = roundSubPixels(rect.top + rect.height);
                 
-                setSignal(position.left, left);
-                setSignal(position.top, top);
-                setSignal(position.right, right);
-                setSignal(position.bottom, bottom);
+                config.signal.setSignal(position.left, left);
+                config.signal.setSignal(position.top, top);
+                config.signal.setSignal(position.right, right);
+                config.signal.setSignal(position.bottom, bottom);
 
                 // Update size
                 const width = roundSubPixels(rect.width);
                 const height = roundSubPixels(rect.height);
 
                 if (sizeJSON.width !== width || sizeJSON.height !== height) {
-                    setSignal(size.width, width);
-                    setSignal(size.height, height);
+                    config.signal.setSignal(size.width, width);
+                    config.signal.setSignal(size.height, height);
 
                     this.#didSizeChanged = true;
                 }
@@ -263,21 +262,21 @@ class Tracker {
                 const newBottom = relativeElementPositionJSON ? roundSubPixels(relativeElementPositionJSON.bottom - bottom) : roundSubPixels(window.innerHeight - bottom);
 
                 if (relativePositionJSON.left !== newLeft || relativePositionJSON.top !== newTop || relativePositionJSON.right !== newRight || relativePositionJSON.bottom !== newBottom) {
-                    setSignal(relativePosition.left, newLeft);
-                    setSignal(relativePosition.top, newTop);
-                    setSignal(relativePosition.right, newRight);
-                    setSignal(relativePosition.bottom, newBottom);
+                    config.signal.setSignal(relativePosition.left, newLeft);
+                    config.signal.setSignal(relativePosition.top, newTop);
+                    config.signal.setSignal(relativePosition.right, newRight);
+                    config.signal.setSignal(relativePosition.bottom, newBottom);
 
                     this.#didPositionChanged = true;
                 }
 
-                if (!unSignal(visible)) {
-                    setSignal(visible, true);
+                if (!config.signal.unSignal(visible)) {
+                    config.signal.setSignal(visible, true);
                     this.#didVisibleChanged = true;
                 }
             } else {
-                if (unSignal(visible)) {
-                    setSignal(visible, false);
+                if (config.signal.unSignal(visible)) {
+                    config.signal.setSignal(visible, false);
                     this.#didVisibleChanged = true;
                 }
             }

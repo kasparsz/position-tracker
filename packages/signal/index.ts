@@ -1,6 +1,7 @@
 import { signal, computed, effect, isSignal, isComputed, isEffect, effectScope, startBatch, endBatch } from 'alien-signals';
-export { signal, computed, effect, isSignal, isComputed, isEffect, effectScope, startBatch, endBatch };
+import { config } from '../core/config';
 
+export * from 'alien-signals';
 export type SignalType<T> = ReturnType<typeof signal<T>>;
 
 /**
@@ -24,6 +25,22 @@ export function unSignal<T> (value: SignalType<T>|T):typeof value extends Signal
  * @param signal The signal to set
  * @param value The value to set
  */
-export function setSignal<T> (signal: SignalType<T>, value: T) {
+function setSignal<T> (signal: SignalType<T>, value: T) {
     signal(value);
 }
+
+config.signal = {
+    unSignal,
+    setSignal,
+    signal,
+    computed,
+    effect,
+    isSignal,
+    isComputed,
+    isEffect,
+    effectScope,
+    startBatch,
+    endBatch,
+}
+
+export * from '../core/index';

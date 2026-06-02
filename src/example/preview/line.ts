@@ -1,8 +1,7 @@
 import { type Tracker } from '../../tracker';
 import { type TrackerSizeSignal } from '../../tracker-size';
 import { type TrackerPositionSignal, type TrackerPosition } from '../../tracker-position';
-import { effect } from 'alien-signals';
-import { unSignal } from '../../signal';
+import { effect, unSignal } from '../../signal';
 
 function getClosestPointOnRectangle(rectangleA: { left: number, top: number, width: number, height: number }, point: { left: number, top: number }) {
     return {

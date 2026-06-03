@@ -3,7 +3,7 @@ import { ref, onMounted, useTemplateRef, watchEffect, onUnmounted } from 'vue';
 import { track } from '../../dist/position-tracker-vue';
 import { highlighter } from './preview/highlighter';
 import { draggable } from './preview/draggable';
-import { line } from './preview/line';
+import { useLine } from './preview/line';
 
 const element = useTemplateRef('element');
 const textTitle = ref('');
@@ -12,6 +12,7 @@ let tracker = null;
 let highlight = null;
 let removeDraggable = null;
 
+// useLine(tracker)
 const virtualTracker = {
     position: {
         left: 50,
@@ -32,7 +33,7 @@ const virtualTracker = {
 onMounted(() => {
     tracker = track(element.value, virtualTracker);
     highlight = highlighter(element.value);
-    line(tracker);
+    // line(tracker);
 
     watchEffect(() => {
         highlight.highlight();

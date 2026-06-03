@@ -24,3 +24,4 @@ config.signal = {
 }
 
 export * from '../core/index';
+export * from './composable';

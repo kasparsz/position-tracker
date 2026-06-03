@@ -1,5 +1,5 @@
 import { type Tracker, type TrackerSizeSignal, type TrackerPositionSignal, type TrackerPosition, unSignal } from '../../../dist/position-tracker-vue';
-import { watchEffect, toValue } from 'vue';
+import { watch, watchEffect, onScopeDispose } from 'vue';
 
 function getClosestPointOnRectangle(rectangleA: { left: number, top: number, width: number, height: number }, point: { left: number, top: number }) {
     return {
@@ -24,7 +24,7 @@ function normalizeSize(size: TrackerSizeSignal|null) {
     };
 }
 
-export function line(tracker:Tracker) {
+export function useLine(tracker:Tracker) {
     const line = document.createElement('div');
     line.style.position = 'fixed';
     line.style.left = '0';
@@ -37,7 +37,9 @@ export function line(tracker:Tracker) {
     document.body.appendChild(line);
 
     watchEffect(() => {
-        if (tracker.relative) {
+        const relativeElement = tracker.relative?.element;
+
+        if (tracker.relative && relativeElement !== document.body && tracker.visible.value) {
             const sPosition = normalizePosition(tracker.position);
             const sSize = normalizeSize(tracker.size);
             const sCenterPoint = { left: (sPosition.left + sSize.width / 2), top: (sPosition.top + sSize.height / 2) };
@@ -57,10 +59,13 @@ export function line(tracker:Tracker) {
     
             line.style.transform = `translate(${closestSPoint.left}px, ${closestSPoint.top}px) rotate(${Math.atan2(height, width)}rad)`;
             line.style.width = `${Math.sqrt(width * width + height * height)}px`;
+            line.style.display = 'block';
+        } else {
+            line.style.display = 'none';
         }
     });
 
-    return () => {
+    onScopeDispose(() => {
         line.remove();
-    };
+    });
 }

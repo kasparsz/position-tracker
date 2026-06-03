@@ -1,37 +1,23 @@
 <script setup>
-import { ref, defineExpose, toValue, onMounted, useTemplateRef, watch, watchEffect, onUnmounted } from 'vue';
-import { track } from '../../dist/position-tracker-vue';
+import { ref, computed, defineExpose, toValue, onMounted, useTemplateRef, watch, watchEffect, onUnmounted } from 'vue';
+import { useTracker } from '../../dist/position-tracker-vue';
 import { highlighter } from './preview/highlighter';
 import { draggable } from './preview/draggable';
-import { line } from './preview/line';
+import { useLine } from './preview/line';
 import BoxRemove from './BoxRemove.vue';
 
-const props = defineProps(['relative'])
+const props = defineProps(['relative', 'debug', 'disabled'])
 
 const element = useTemplateRef('element');
+const relative = computed(() => props.relative);
 const textTitle = ref('');
 const textPosition = ref('');
-let tracker = null;
+let tracker = useTracker(element, relative);
 let highlight = null;
 let removeDraggable = null;
-let removeLine = null;
 
-function setupTracking(relative) {
-    tracker = track(element.value, relative);
-    highlight = highlighter(element.value);
+useLine(tracker);
 
-    if (relative !== document && relative !== window) {
-        removeLine = line(tracker);
-    }
-    
-    watchEffect(() => {
-        highlight.highlight();
-        textTitle.value = relative === undefined ? 'body' : relative === window ? 'window' : 'relative';
-        textPosition.value = `${tracker.relativePosition.left.value.toFixed(0)} x ${tracker.relativePosition.top.value.toFixed(0)}`;
-    });
-
-    setupDraggable();
-}
 function setupDraggable() {
     if (removeDraggable) {
         removeDraggable();
@@ -42,39 +28,23 @@ function setupDraggable() {
 }
 
 onMounted(() => {
-    if (props.relative !== false) {
-        if (props.relative === undefined) {
-            setupTracking(document);
-        } else if (props.relative) {
-            setupTracking(props.relative);
-        } else {
-            watch(() => props.relative, () => {
-                const rel = toValue(props.relative);
+    setupDraggable();
 
-                if (rel && rel.element) {
-                    setupTracking(rel.element);
-                } else {
-                    console.log(rel);
-                }
-            });
-        }
-    } else {
-        setupDraggable();
+    if (!props.disabled) {
+        highlight = highlighter(element.value);
+        
+        watchEffect(() => {
+            highlight.highlight();
+            textTitle.value = props.relative === document || props.relative === document.body ? 'body' : props.relative === window ? 'window' : 'relative';
+            textPosition.value = `${tracker.relativePosition.left.value.toFixed(0)} x ${tracker.relativePosition.top.value.toFixed(0)}`;
+        });
     }
 });
 
 function cleanup() {
-    if (tracker) {
-        tracker.destroy();
-        tracker = null;
-    }
     if (removeDraggable) {
         removeDraggable();
         removeDraggable = null;
-    }
-    if (removeLine) {
-        removeLine();
-        removeLine = null;
     }
 }
 

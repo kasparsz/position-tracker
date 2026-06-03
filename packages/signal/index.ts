@@ -1,8 +1,7 @@
-import { signal, computed, effect, isSignal, isComputed, isEffect, effectScope, startBatch, endBatch } from 'alien-signals';
+import { signal, isSignal, isComputed, startBatch, endBatch } from 'alien-signals';
 import { config } from '../core/config';
 
-export * from 'alien-signals';
-export type SignalType<T> = ReturnType<typeof signal<T>>;
+type SignalType<T> = ReturnType<typeof signal<T>>;
 
 /**
  * Unsignalify a signal or raw value
@@ -30,15 +29,9 @@ function setSignal<T> (signal: SignalType<T>, value: T) {
 }
 
 config.signal = {
+    signal,
     unSignal,
     setSignal,
-    signal,
-    computed,
-    effect,
-    isSignal,
-    isComputed,
-    isEffect,
-    effectScope,
     startBatch,
     endBatch,
 }

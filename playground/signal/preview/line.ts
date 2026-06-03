@@ -1,7 +1,5 @@
-import { type Tracker } from '../../tracker';
-import { type TrackerSizeSignal } from '../../tracker-size';
-import { type TrackerPositionSignal, type TrackerPosition } from '../../tracker-position';
-import { effect, unSignal } from '../../signal';
+import { type Tracker, type TrackerSizeSignal, type TrackerPositionSignal, type TrackerPosition, unSignal } from '../../../dist/position-tracker';
+import { effect } from 'alien-signals';
 
 function getClosestPointOnRectangle(rectangleA: { left: number, top: number, width: number, height: number }, point: { left: number, top: number }) {
     return {
@@ -38,7 +36,7 @@ export function line(tracker:Tracker) {
     line.style.transformOrigin = 'left top';
     document.body.appendChild(line);
 
-    effect(() => {
+    const handleRemove = effect(() => {
         if (tracker.relative) {
             const sPosition = normalizePosition(tracker.position);
             const sSize = normalizeSize(tracker.size);
@@ -61,4 +59,9 @@ export function line(tracker:Tracker) {
             line.style.width = `${Math.sqrt(width * width + height * height)}px`;
         }
     });
+
+    return () => {
+        handleRemove();
+        line.remove();
+    };
 }

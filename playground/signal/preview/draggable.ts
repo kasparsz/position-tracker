@@ -1,4 +1,4 @@
-import { frame } from '../../index';
+import { frame } from '../../../dist/position-tracker';
 
 export function draggable (element: HTMLElement, callback: (position: { x: number, y: number }) => void) {
     const accumulatedPosition = { x: 0, y: 0 };

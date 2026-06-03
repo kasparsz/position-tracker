@@ -5,10 +5,6 @@ type SignalLibrary<T> = {
     signal: (value: any) => T;
     unSignal: (signal: T) => any;
     setSignal: (signal: T, value: any) => void;
-    computed: () => T;
-    effect: () => void;
-    isSignal: (value: any) => boolean;
-    isComputed: (value: any) => boolean;
     startBatch: () => void;
     endBatch: () => void;
 }
@@ -45,10 +41,6 @@ export const config = {
         signal: null,
         unSignal: null,
         setSignal: null,
-        computed: null,
-        effect: null,
-        isSignal: null,
-        isComputed: null,
         startBatch: null,
         endBatch: null,
     } as unknown as SignalLibrary<any>,
@@ -80,18 +72,6 @@ export const signal = {
     },
     get setSignal () {
         return config.signal.setSignal;
-    },
-    get computed () {
-        return config.signal.computed;
-    },
-    get effect () {
-        return config.signal.effect;
-    },
-    get isSignal () {
-        return config.signal.isSignal;
-    },
-    get isComputed () {
-        return config.signal.isComputed;
     },
     get startBatch () {
         return config.signal.startBatch;

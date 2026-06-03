@@ -223,7 +223,7 @@ class Tracker {
             const sizeJSON = size.toJSON();
             const positionJSON = position.toJSON();
             const relativePositionJSON = relativePosition.toJSON();
-            const relativeElementPositionJSON = relative? ('toJSON' in relative.position ? relative.position.toJSON() : relative.position) : null;
+            const relativeElementPositionJSON = relative ? ('toJSON' in relative.position ? relative.position.toJSON() : relative.position) : null;
             const rects = element.getClientRects();
 
             if (relative) {
@@ -256,10 +256,10 @@ class Tracker {
                 
                 // Update relative position
                 // We need to round sub-pixel values to avoid floating point errors because of transforms
-                const newLeft = relativeElementPositionJSON ? roundSubPixels(left - relativeElementPositionJSON.left) : left;
-                const newTop = relativeElementPositionJSON ? roundSubPixels(top - relativeElementPositionJSON.top) : top;
-                const newRight = relativeElementPositionJSON ? roundSubPixels(relativeElementPositionJSON.right - right) : roundSubPixels(document.documentElement.clientWidth - right);
-                const newBottom = relativeElementPositionJSON ? roundSubPixels(relativeElementPositionJSON.bottom - bottom) : roundSubPixels(window.innerHeight - bottom);
+                const newLeft = relativeElementPositionJSON ? roundSubPixels(left - config.signal.unSignal(relativeElementPositionJSON.left)) : left;
+                const newTop = relativeElementPositionJSON ? roundSubPixels(top - config.signal.unSignal(relativeElementPositionJSON.top)) : top;
+                const newRight = relativeElementPositionJSON ? roundSubPixels(config.signal.unSignal(relativeElementPositionJSON.right) - right) : roundSubPixels(document.documentElement.clientWidth - right);
+                const newBottom = relativeElementPositionJSON ? roundSubPixels(config.signal.unSignal(relativeElementPositionJSON.bottom) - bottom) : roundSubPixels(window.innerHeight - bottom);
 
                 if (relativePositionJSON.left !== newLeft || relativePositionJSON.top !== newTop || relativePositionJSON.right !== newRight || relativePositionJSON.bottom !== newBottom) {
                     config.signal.setSignal(relativePosition.left, newLeft);

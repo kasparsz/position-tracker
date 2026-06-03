@@ -7,5 +7,8 @@ export function removeable (element: HTMLElement, clickHandler: () => void) {
     const textElement = document.createElement('span');
     element.appendChild(textElement);
 
-    removeButton.addEventListener('click', clickHandler);
+    removeButton.addEventListener('click', (event) => {
+        removeButton.remove();
+        clickHandler();
+    });
 }

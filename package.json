@@ -1,40 +1,41 @@
 {
   "name": "@kasparsz/position-tracker",
-  "version": "0.2.11",
+  "version": "1.0.0",
   "type": "module",
-  "main": "./dist/position-tracker.umd.cjs",
-  "module": "./dist/position-tracker.js",
+  "main": "./dist/position-tracker.mjs",
+  "module": "./dist/position-tracker.mjs",
+  "unpkg": "./dist/position-tracker.mjs",
   "types": "./dist/position-tracker.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/position-tracker.js",
-      "require": "./dist/position-tracker.umd.cjs",
       "types": "./dist/position-tracker.d.ts",
-      "module": "./dist/position-tracker.js"
+      "default": "./dist/position-tracker.mjs"
     },
-    "./package.json": "./package.json"
+    "./vue": {
+      "types": "./dist/position-tracker-vue.d.ts",
+      "default": "./dist/position-tracker-vue.mjs"
+    },
+    "./dist/*": "./dist/*"
   },
-  "browser": {
-    "alien-signals": "alien-signals/esm"
-  },
+
   "author": "Kaspars Zuks",
   "license": "MIT",
+  "workspaces": [
+    "packages/*",
+    "playground",
+    "playground/*"
+  ],
   "scripts": {
-    "dev": "vite",
     "build": "tsdown",
-    "compress": "terser --compress  --mangle --module --config-file=\"terserconfig.json\" dist/position-tracker.js -o dist/position-tracker.min.js",
-    "check-compression-rate": "node check-compression-rate.js",
-    "preview": "vite preview",
-    "prepublish": "npm run build",
-    "test": "vitest --run"
+    "dev": "concurrently \"npm run dev:build\" \"npm run dev:playground\"",
+    "dev:build": "tsdown --watch",
+    "dev:playground": "cd playground && npm run dev",
+    "prepublish": "npm run build"
   },
   "devDependencies": {
-    "terser": "^5.43.1",
     "tsdown": "^0.22.1",
     "typescript": "~5.9.3",
-    "vite": "npm:rolldown-vite@latest",
-    "vite-plugin-dts": "^4.5.4",
-    "vitest": "^4.0.12"
+    "concurrently": "^10.0.3"
   },
   "repository": {
     "type": "git",
@@ -44,8 +45,16 @@
     "url": "https://github.com/kasparsz/position-tracker/issues"
   },
   "peerDependencies": {
-    "alien-signals": "^3.2.1",
-    "vue": "^3.5.35"
+    "alien-signals": ">=3.0.0",
+    "vue": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "alien-signals": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
   },
   "volta": {
     "node": "24.12.0"

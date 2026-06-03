@@ -1,0 +1,7 @@
+{
+  "name": "position-tracker-vue",
+  "type": "module",
+  "devDependencies": {
+    "vue": "^3.5.35"
+  }
+}

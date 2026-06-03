@@ -1,10 +1,10 @@
-import { track } from '../tracker';
+import { track } from '../../dist/position-tracker';
 import { draggable } from './preview/draggable';
 import { highlighter } from './preview/highlighter';
 import { line } from './preview/line';
 import { removeable } from './preview/removeable';
 
-import { signal, effect } from '../signal';
+import { signal, effect } from 'alien-signals';
 
 function trackWindowElementWithDraggable (element: HTMLElement) {
     removeable(element, () => {

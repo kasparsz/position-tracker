@@ -23,4 +23,6 @@ dist-ssr
 *.sw?
 
 # GIT specific
-dist
+packages/core/dist/
+packages/vue/dist/
+dist/

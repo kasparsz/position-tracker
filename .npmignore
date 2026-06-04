@@ -23,5 +23,7 @@ dist-ssr
 *.sw?
 
 # NPM specific
-src
-public
+packages
+script
+playground
+tsdown.config.ts

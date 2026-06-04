@@ -1,11 +1,11 @@
 # @kasparsz/position-tracker
 
-A high-performance, reactive element position and size tracker for the web, powered by [alien-signals](https://github.com/stackblitz/alien-signals).
+A high-performance, reactive element position and size tracker for the web, powered by [alien-signals](https://github.com/stackblitz/alien-signals) or [vue](http://vuejs.org/).
 
 ## Features
 
 - 🚀 **High Performance**: Optimized frame loop to batch read/write DOM operations and minimize layout thrashing and unnecessary computations.
-- ⚡ **Reactive**: Seamlessly integrates with `alien-signals` for efficient state management and updates.
+- ⚡ **Reactive**: Seamlessly integrates with `alien-signals` / `vue` for efficient state management and updates.
 - 📏 **Relative Tracking**: Track elements relative to other elements, the window, or custom virtual trackers.
 - 🧩 **Virtual Trackers**: Define custom tracking points or regions not directly tied to a DOM element.
 - 🛠️ **Lightweight**: Minimal dependencies and small bundle size.
@@ -19,6 +19,7 @@ npm install @kasparsz/position-tracker
 
 ## Quick Start
 
+For signals
 ```typescript
 import { track } from '@kasparsz/position-tracker';
 
@@ -49,9 +50,40 @@ const removeListener = tracker.on(onChange);
 // tracker.off(onChange);
 ```
 
+For VUE
+```typescript
+import { track } from '@kasparsz/position-tracker';
+
+const element = document.querySelector('.my-element');
+const tracker = track(element);
+
+// Listen for changes
+function onChange (tracker) {
+  console.log('Position:', tracker.relativePosition.toJSON()); // => { left: 0, top: 0, right: 0, bottom: 0 }
+  console.log('Left:', tracker.relativePosition.left.value); // => 0
+  console.log('Top:', tracker.relativePosition.top.value); // => 0
+  console.log('Right:', tracker.relativePosition.right.value); // => 0
+  console.log('Bottom:', tracker.relativePosition.bottom.value); // => 0
+
+  console.log('Size:', tracker.size.toJSON()); // => { width: 0, height: 0 }
+  console.log('Width:', tracker.size.width.value); // => 0
+  console.log('Height:', tracker.size.height.value); // => 0
+  
+  console.log('Visible:', tracker.visible.value); // => true or false
+}
+
+const removeListener = tracker.on(onChange);
+
+// To stop tracking
+// removeListener();
+
+// or
+// tracker.off(onChange);
+```
+
 ## Usage
 
-### Relative Tracking
+### Relative Tracking (signals)
 
 Track an element relative to another element:
 
@@ -67,12 +99,29 @@ tracker.on((t) => {
 });
 ```
 
-### Using Signals
+### Relative Tracking (VUE)
+
+Track an element relative to another element:
+
+```typescript
+const element = document.querySelector('.child');
+const parent = document.querySelector('.parent');
+
+const tracker = track(element, parent);
+
+tracker.on((t) => {
+  // Coordinates are now relative to the parent element
+  console.log('Relative Position:', t.relativePosition.left.value);
+});
+```
+
+### Using `alien-signals` reactivity
 
 Integration with `alien-signals` allows for powerful reactive patterns:
 
 ```typescript
-import { track, effect } from '@kasparsz/position-tracker';
+import { effect } from 'alien-signals';
+import { track } from '@kasparsz/position-tracker';
 
 const tracker = track(document.querySelector('.box'));
 
@@ -85,6 +134,28 @@ effect(() => {
 });
 effect(() => {
   console.log('Visible changed:', tracker.visible());
+});
+```
+
+### Using vue reactivity
+
+Integration with `vue` allows for powerful reactive patterns:
+
+```typescript
+import { watchEffect } from 'vue'
+import { track } from '@kasparsz/position-tracker';
+
+const tracker = track(document.querySelector('.box'));
+
+// Listen for changes
+watchEffect(() => {
+  console.log('Position changed:', tracker.relativePosition.left.value, tracker.relativePosition.top.value);
+});
+watchEffect(() => {
+  console.log('Size changed:', tracker.size.width.value, tracker.size.height.value);
+});
+watchEffect(() => {
+  console.log('Visible changed:', tracker.visible.value);
 });
 ```
 
@@ -118,6 +189,36 @@ const virtualTracker = {
     bottom: signal(200),
   }
 };
+```
+
+For `vue`:
+```typescript
+import { ref } from 'vue';
+
+const virtualTracker = {
+  position: {
+    left: ref(100),
+    top: ref(100),
+    right: ref(200),
+    bottom: ref(200),
+  }
+};
+```
+
+### VUE composable
+
+Composable simplifies tracking in vue, providing a more reactive API.
+
+```typescript
+import { useTemplateRef, watchEffect } from 'vue';
+import { useTracker } from '@kasparsz/position-tracker-vue';
+
+const element = useTemplateRef('element');
+const tracker = useTracker(element, document);
+
+watchEffect(() => {
+    console.log('Position changed:', tracker.relativePosition.left.value, tracker.relativePosition.top.value);
+});
 ```
 
 ### Controlling the Tracker

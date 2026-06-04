@@ -36,9 +36,9 @@ export function useLine(tracker:Tracker) {
     line.style.transformOrigin = 'left top';
     document.body.appendChild(line);
 
-    watchEffect(() => {
+    function update() {
         const relativeElement = tracker.relative?.element;
-
+    
         if (tracker.relative && relativeElement !== document.body && tracker.visible.value) {
             const sPosition = normalizePosition(tracker.position);
             const sSize = normalizeSize(tracker.size);
@@ -46,7 +46,7 @@ export function useLine(tracker:Tracker) {
     
             const tPosition = normalizePosition(tracker.relative.position);
             const tSize = normalizeSize('size' in tracker.relative ? tracker.relative.size : null);
-
+    
             const tCenterPoint = { left: (tPosition.left + tSize.width / 2), top: (tPosition.top + tSize.height / 2) };
     
             const cPoint = { left: (tCenterPoint.left + sCenterPoint.left) / 2, top: (tCenterPoint.top + sCenterPoint.top) / 2 };
@@ -63,7 +63,16 @@ export function useLine(tracker:Tracker) {
         } else {
             line.style.display = 'none';
         }
-    });
+    }
+
+    tracker.on(update);
+
+    watch([
+        tracker.position.left,
+        tracker.position.top
+    ], () => {
+        update();
+    })
 
     onScopeDispose(() => {
         line.remove();

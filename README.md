@@ -205,6 +205,22 @@ const virtualTracker = {
 };
 ```
 
+### VUE composable
+
+Composable simplifies tracking in vue, providing a more reactive API.
+
+```typescript
+import { useTemplateRef, watchEffect } from 'vue';
+import { useTracker } from '@kasparsz/position-tracker-vue';
+
+const element = useTemplateRef('element');
+const tracker = useTracker(element, document);
+
+watchEffect(() => {
+    console.log('Position changed:', tracker.relativePosition.left.value, tracker.relativePosition.top.value);
+});
+```
+
 ### Controlling the Tracker
 
 ```typescript

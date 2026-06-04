@@ -21,7 +21,6 @@ export function useTracker(element: HTMLElement|Element|Document|Ref<HTMLElement
     
     if (isRef(relativeElement)) {
         watch([relativeElement], () => {
-            console.log('relativeElement changed', toValue(relativeElement));
             tracker.setRelativeElement(toValue(relativeElement as Ref<HTMLElement|Element|Document|Window|VirtualTracker<TrackerPosition|TrackerPositionSignal|TrackerPositionAsSignal>|null>) || null);
         });
     }

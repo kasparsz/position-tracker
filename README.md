@@ -52,7 +52,7 @@ const removeListener = tracker.on(onChange);
 
 For VUE
 ```typescript
-import { track } from '@kasparsz/position-tracker';
+import { track } from '@kasparsz/position-tracker/vue';
 
 const element = document.querySelector('.my-element');
 const tracker = track(element);
@@ -143,7 +143,7 @@ Integration with `vue` allows for powerful reactive patterns:
 
 ```typescript
 import { watchEffect } from 'vue'
-import { track } from '@kasparsz/position-tracker';
+import { track } from '@kasparsz/position-tracker/vue';
 
 const tracker = track(document.querySelector('.box'));
 
@@ -211,7 +211,7 @@ Composable simplifies tracking in vue, providing a more reactive API.
 
 ```typescript
 import { useTemplateRef, watchEffect } from 'vue';
-import { useTracker } from '@kasparsz/position-tracker-vue';
+import { useTracker } from '@kasparsz/position-tracker/vue';
 
 const element = useTemplateRef('element');
 const tracker = useTracker(element, document);

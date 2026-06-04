@@ -10,7 +10,7 @@ import { type VirtualTracker } from '../core/virtual-tracker';
  * @param relativeElement - The element to track relative to
  * @returns - The tracker instance
  */
-export function useTracker(element: HTMLElement|Element|Document|Ref<HTMLElement|Element|Document|null|undefined>, relativeElement: HTMLElement|Element|Document|Window|VirtualTracker<TrackerPosition|TrackerPositionSignal|TrackerPositionAsSignal>|null = null) {
+export function useTracker(element: HTMLElement|Element|Document|Ref<HTMLElement|Element|Document|null|undefined>, relativeElement: HTMLElement|Element|Document|Window|Ref<HTMLElement|Element|Document|null|undefined>|VirtualTracker<TrackerPosition|TrackerPositionSignal|TrackerPositionAsSignal>|null = null) {
     const tracker = track(toValue(element) || null, toValue(relativeElement) || null);
 
     if (isRef(element)) {

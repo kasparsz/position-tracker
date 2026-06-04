@@ -1,7 +1,7 @@
 import { signal, isSignal, isComputed, startBatch, endBatch } from 'alien-signals';
 import { config } from '../core/config';
 
-type SignalType<T> = ReturnType<typeof signal<T>>;
+export type SignalType<T> = ReturnType<typeof signal<T>>;
 
 /**
  * Unsignalify a signal or raw value

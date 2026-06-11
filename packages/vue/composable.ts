@@ -1,5 +1,5 @@
 import { toValue, isRef, watch, type Ref, onScopeDispose } from 'vue';
-import { track } from '../core/tracker';
+import { track, type Tracker } from '../core/tracker';
 import { type TrackerPositionSignal, type TrackerPosition, type TrackerPositionAsSignal } from '../core/tracker-position';
 import { type VirtualTracker } from '../core/virtual-tracker';
 
@@ -10,7 +10,7 @@ import { type VirtualTracker } from '../core/virtual-tracker';
  * @param relativeElement - The element to track relative to
  * @returns - The tracker instance
  */
-export function useTracker(element: HTMLElement|Element|Document|Ref<HTMLElement|Element|Document|null|undefined>, relativeElement: HTMLElement|Element|Document|Window|Ref<HTMLElement|Element|Document|null|undefined>|VirtualTracker<TrackerPosition|TrackerPositionSignal|TrackerPositionAsSignal>|null = null) {
+export function useTracker(element: HTMLElement|Element|Document|Ref<HTMLElement|Element|Document|null|undefined>, relativeElement: HTMLElement|Element|Document|Window|Tracker|Ref<HTMLElement|Element|Document|null|undefined>|VirtualTracker<TrackerPosition|TrackerPositionSignal|TrackerPositionAsSignal>|null = null) {
     const tracker = track(toValue(element) || null, toValue(relativeElement) || null);
 
     if (isRef(element)) {
@@ -21,7 +21,7 @@ export function useTracker(element: HTMLElement|Element|Document|Ref<HTMLElement
     
     if (isRef(relativeElement)) {
         watch([relativeElement], () => {
-            tracker.setRelativeElement(toValue(relativeElement as Ref<HTMLElement|Element|Document|Window|VirtualTracker<TrackerPosition|TrackerPositionSignal|TrackerPositionAsSignal>|null>) || null);
+            tracker.setRelativeElement(toValue(relativeElement as Ref<HTMLElement|Element|Document|Window|Tracker|VirtualTracker<TrackerPosition|TrackerPositionSignal|TrackerPositionAsSignal>|null>) || null);
         });
     }
 

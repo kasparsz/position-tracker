@@ -45,6 +45,9 @@ class Tracker {
     // Is tracker attached to the frame loop
     #isLoopAttached: boolean = false;
 
+    // Is tracker destroyed
+    #isDestroyed: boolean = false;
+
     // State of which properties changed
     #didPositionChanged: boolean = false;
     #didSizeChanged: boolean = false;
@@ -58,7 +61,7 @@ class Tracker {
     // Listener for relative tracker changes
     #removeRelativeChangeListener: (() => void) | null = null;
 
-    constructor (element: HTMLElement|Element|Document|null, relativeHTMLElement: HTMLElement|Element|Document|Window|VirtualTracker<TrackerPosition|TrackerPositionSignal|TrackerPositionAsSignal>|null = null) {
+    constructor (element: HTMLElement|Element|Document|null, relativeHTMLElement: HTMLElement|Element|Document|Window|Tracker|VirtualTracker<TrackerPosition|TrackerPositionSignal|TrackerPositionAsSignal>|null = null) {
         this.setElement(element);
         this.setRelativeElement(relativeHTMLElement);
     }
@@ -69,6 +72,10 @@ class Tracker {
      * @param element - The element to track
      */
     setElement (element: HTMLElement | Element | Document | null) {
+        if (this.#isDestroyed) {
+            return;
+        }
+
         // If element is a document, use the body as the element which to track because properties like getClientRects
         // are not available on the document
         const htmlElement = element instanceof Document || element instanceof HTMLHtmlElement ? document.body : element;
@@ -81,7 +88,11 @@ class Tracker {
      * 
      * @param relativeElement - The relative element to track
      */
-    setRelativeElement (relativeElement: HTMLElement|Element|Document|Window|VirtualTracker<TrackerPosition|TrackerPositionSignal|TrackerPositionAsSignal>|null) {
+    setRelativeElement (relativeElement: HTMLElement|Element|Document|Window|Tracker|VirtualTracker<TrackerPosition|TrackerPositionSignal|TrackerPositionAsSignal>|null) {
+        if (this.#isDestroyed) {
+            return;
+        }
+
         // If relative element is a window, use undefined because when tracking htmlElement it uses getClientRects which
         // returns values that are relative to the window already
         const relativeHTMLElement = relativeElement instanceof Window ? undefined : relativeElement;
@@ -90,6 +101,8 @@ class Tracker {
             // Virtual tracker is a tracker that is not attached to the DOM,
             // coordinates are relative to the viewport
             this.relative = unsignalifyVirtualTracker(relativeHTMLElement);
+        } else if (relativeHTMLElement instanceof Tracker) {
+            this.relative = relativeHTMLElement;
         } else if (relativeHTMLElement && !(relativeHTMLElement instanceof Window)) {
             // Because we use getClientRects values are relative to the viewport already
             // so we only need to track the relative element if it's not a window
@@ -326,6 +339,7 @@ class Tracker {
         this.#callbacks.clear();
         this.relative = undefined;
         this.#isPaused = true;
+        this.#isDestroyed = true;
     }
 
     /**
@@ -350,7 +364,7 @@ class Tracker {
  * @param relativeElement - The element to track relative to
  * @returns The tracker instance
  */
-export function track (element: HTMLElement|Element|Document|null, relativeElement?: HTMLElement|Element|Document|Window|VirtualTracker<TrackerPosition|TrackerPositionSignal|TrackerPositionAsSignal>|null):Tracker {
+export function track (element: HTMLElement|Element|Document|null, relativeElement?: HTMLElement|Element|Document|Window|Tracker|VirtualTracker<TrackerPosition|TrackerPositionSignal|TrackerPositionAsSignal>|null):Tracker {
     return new Tracker(element, relativeElement);
 }
 

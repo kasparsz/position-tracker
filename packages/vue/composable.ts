@@ -1,4 +1,4 @@
-import { toValue, isRef, watch, type Ref, onScopeDispose } from 'vue';
+import { toValue, isRef, watch, type Ref, onScopeDispose, getCurrentScope } from 'vue';
 import { track, type Tracker } from '../core/tracker';
 import { type TrackerPositionSignal, type TrackerPosition, type TrackerPositionAsSignal } from '../core/tracker-position';
 import { type VirtualTracker } from '../core/virtual-tracker';
@@ -25,9 +25,11 @@ export function useTracker(element: HTMLElement|Element|Document|Ref<HTMLElement
         });
     }
 
-    onScopeDispose(() => {
-        tracker.destroy();
-    });
+    if (getCurrentScope()) {
+        onScopeDispose(() => {
+            tracker.destroy();
+        });
+    }
 
     return tracker;
 }
